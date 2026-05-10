@@ -126,8 +126,8 @@ function buildPanelHTML() {
         + '<button id="wardrobe_save_preset">💾 保存到收藏</button>'
         + '</div>'
 
-        // 生成结果
-        + '<div class="wardrobe-result empty" id="wardrobe_result">点击「随机生成」来生成穿搭描述...</div>'
+        // 生成结果（可编辑）
+        + '<textarea id="wardrobe_result" rows="4" placeholder="点击「随机生成」来生成穿搭描述...&#10;生成后可在此手动修改细节，确认后再点应用" style="width:100%;box-sizing:border-box;font-size:0.85em;padding:8px;margin-top:8px;resize:vertical;border:1px solid var(--SmartThemeBorderColor,#555);border-radius:6px;background:var(--SmartThemeBlurTintColor,rgba(0,0,0,0.2));color:var(--SmartThemeBodyColor,#ccc);line-height:1.5;"></textarea>'
 
         // 现有穿搭列表
         + '<div class="wardrobe-active-section">'
@@ -213,9 +213,9 @@ function renderAttributes() {
 function renderResult() {
     var el = jQuery('#wardrobe_result');
     if (currentOutfitText) {
-        el.text(currentOutfitText).removeClass('empty');
+        el.val(currentOutfitText);
     } else {
-        el.text('点击「随机生成」来生成穿搭描述...').addClass('empty');
+        el.val('');
     }
 }
 
@@ -311,7 +311,7 @@ async function generateOutfit() {
     var result = jQuery('#wardrobe_result');
 
     btn.prop('disabled', true).html('<span class="wardrobe-loading"></span>生成中...');
-    result.text('正在生成穿搭描述...').addClass('empty');
+    result.val('正在生成穿搭描述...');
 
     try {
         var prompt = buildPrompt();
@@ -334,7 +334,7 @@ async function generateOutfit() {
     } catch (err) {
         console.error(DEBUG_PREFIX + ' Generation error:', err);
         toastr.error('生成失败: ' + err.message);
-        result.text('生成失败，请检查API设置').addClass('empty');
+        result.val('生成失败，请检查API设置');
     } finally {
         isGenerating = false;
         btn.prop('disabled', false).html('🎲 随机生成');
@@ -420,6 +420,8 @@ function bindEvents() {
 
     // 应用：将当前穿搭添加到现有穿搭列表
     jQuery('#wardrobe_apply').on('click', function() {
+        // 读取文本框中的内容（用户可能手动修改过）
+        currentOutfitText = jQuery('#wardrobe_result').val().trim();
         if (!currentOutfitText) {
             toastr.warning('请先生成穿搭描述');
             return;
