@@ -8,5 +8,6 @@
     "author": "User",
     "version": "1.0.2",
     "homePage": "https://github.com/Jovial020329/SillyTavern-Wardrobe",
+    "updateUrl": "https://raw.githubusercontent.com/Jovial020329/SillyTavern-Wardrobe/main/manifest.json",
     "auto_update": true
 }
