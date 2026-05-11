@@ -205,6 +205,14 @@ function renderAttributes() {
             var sel = selected.includes(v) ? 'selected' : '';
             return '<span class="wardrobe-tag ' + sel + '" data-dim="' + dimension + '" data-val="' + v + '">' + v + '</span>';
         }).join('');
+        // 渲染已存在的自定义标签（不在预设values中的）
+        var customTags = (selections[dimension] || []).filter(v => !values.includes(v));
+        customTags.forEach(v => {
+            tagsHtml += '<span class="wardrobe-tag selected wardrobe-tag-user" data-dim="' + dimension + '" data-val="' + v + '">'
+                + v + ' <span class="wardrobe-tag-remove">✕</span></span>';
+        });
+        // 添加"+ 自定义"按钮
+        tagsHtml += '<span class="wardrobe-tag wardrobe-tag-custom" data-dim="' + dimension + '">+ 自定义</span>';
         html += '<div class="wardrobe-attr-section"><label>' + dimension + '</label><div class="wardrobe-tags">' + tagsHtml + '</div></div>';
     }
     jQuery('#wardrobe_attrs').html(html);
@@ -393,8 +401,9 @@ function bindEvents() {
         renderAttributes();
     });
 
-    // 标签选择
-    jQuery(document).on('click', '.wardrobe-tag', function() {
+    // 标签选择（排除自定义按钮和删除按钮）
+    jQuery(document).on('click', '.wardrobe-tag:not(.wardrobe-tag-custom)', function(e) {
+        if (jQuery(e.target).hasClass('wardrobe-tag-remove')) return;
         var dim = jQuery(this).data('dim');
         var val = jQuery(this).data('val');
         if (!currentSelections[currentCategory]) currentSelections[currentCategory] = {};
@@ -403,6 +412,58 @@ function bindEvents() {
         var idx = arr.indexOf(val);
         if (idx >= 0) { arr.splice(idx, 1); } else { arr.push(val); }
         jQuery(this).toggleClass('selected');
+    });
+
+    // 点击"+ 自定义"按钮，显示内联输入框
+    jQuery(document).on('click', '.wardrobe-tag-custom', function(e) {
+        e.stopPropagation();
+        var dim = jQuery(this).data('dim');
+        if (jQuery(this).siblings('.wardrobe-custom-input-wrap').length) return;
+        var inputHtml = '<span class="wardrobe-custom-input-wrap" data-dim="' + dim + '">'
+            + '<input type="text" class="wardrobe-custom-input" placeholder="输入自定义标签" />'
+            + '<span class="wardrobe-custom-confirm">✓</span>'
+            + '<span class="wardrobe-custom-cancel">✕</span>'
+            + '</span>';
+        jQuery(this).before(inputHtml);
+        jQuery(this).siblings('.wardrobe-custom-input-wrap').find('input').focus();
+    });
+
+    // 确认自定义标签
+    jQuery(document).on('click', '.wardrobe-custom-confirm', function() {
+        var wrap = jQuery(this).closest('.wardrobe-custom-input-wrap');
+        var dim = wrap.data('dim');
+        var val = wrap.find('.wardrobe-custom-input').val().trim();
+        if (!val) { wrap.remove(); return; }
+        if (!currentSelections[currentCategory]) currentSelections[currentCategory] = {};
+        if (!currentSelections[currentCategory][dim]) currentSelections[currentCategory][dim] = [];
+        var arr = currentSelections[currentCategory][dim];
+        if (!arr.includes(val)) arr.push(val);
+        renderAttributes();
+    });
+
+    // 取消自定义输入
+    jQuery(document).on('click', '.wardrobe-custom-cancel', function() {
+        jQuery(this).closest('.wardrobe-custom-input-wrap').remove();
+    });
+
+    // Enter/Escape键支持
+    jQuery(document).on('keydown', '.wardrobe-custom-input', function(e) {
+        if (e.key === 'Enter') jQuery(this).siblings('.wardrobe-custom-confirm').click();
+        if (e.key === 'Escape') jQuery(this).siblings('.wardrobe-custom-cancel').click();
+    });
+
+    // 删除自定义标签
+    jQuery(document).on('click', '.wardrobe-tag-remove', function(e) {
+        e.stopPropagation();
+        var tag = jQuery(this).closest('.wardrobe-tag');
+        var dim = tag.data('dim');
+        var val = tag.data('val');
+        if (currentSelections[currentCategory] && currentSelections[currentCategory][dim]) {
+            var arr = currentSelections[currentCategory][dim];
+            var idx = arr.indexOf(val);
+            if (idx >= 0) arr.splice(idx, 1);
+        }
+        renderAttributes();
     });
 
     // 清除所有标签

@@ -125,6 +125,57 @@
     border-color: var(--SmartThemeQuoteColor, #4a90d9);
 }
 
+/* 自定义标签按钮 */
+.wardrobe-tag-custom {
+    border-style: dashed;
+    color: var(--SmartThemeQuoteColor, #4a90d9);
+    border-color: var(--SmartThemeQuoteColor, #4a90d9);
+    opacity: 0.8;
+}
+.wardrobe-tag-custom:hover {
+    opacity: 1;
+    background: rgba(74, 144, 217, 0.1);
+}
+
+/* 用户自定义标签 */
+.wardrobe-tag-user {
+    border-style: dashed;
+}
+.wardrobe-tag-remove {
+    margin-left: 2px;
+    font-size: 0.8em;
+    opacity: 0.6;
+}
+.wardrobe-tag-remove:hover {
+    opacity: 1;
+    color: #d9534f;
+}
+
+/* 内联输入框 */
+.wardrobe-custom-input-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    vertical-align: middle;
+}
+.wardrobe-custom-input {
+    width: 80px;
+    padding: 2px 6px;
+    font-size: 0.8em;
+    border: 1px solid var(--SmartThemeQuoteColor, #4a90d9);
+    border-radius: 12px;
+    background: transparent;
+    color: var(--SmartThemeBodyColor, #ccc);
+    outline: none;
+}
+.wardrobe-custom-confirm, .wardrobe-custom-cancel {
+    cursor: pointer;
+    font-size: 0.85em;
+    padding: 2px 4px;
+}
+.wardrobe-custom-confirm { color: #5cb85c; }
+.wardrobe-custom-cancel { color: #d9534f; }
+
 /* Result display */
 .wardrobe-result {
     margin: 10px 0;
