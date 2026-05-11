@@ -7,6 +7,6 @@
     "css": "style.css",
     "author": "User",
     "version": "1.0.0",
-    "homePage": "",
-    "auto_update": false
+    "homePage": "https://github.com/Jovial020329/SillyTavern-Wardrobe",
+    "auto_update": true
 }
