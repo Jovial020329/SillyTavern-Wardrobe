@@ -414,26 +414,31 @@ function bindEvents() {
         jQuery(this).toggleClass('selected');
     });
 
-    // 点击"+ 自定义"按钮，显示内联输入框
+    // 点击"+ 自定义"按钮，弹出输入对话框
     jQuery(document).on('click', '.wardrobe-tag-custom', function(e) {
         e.stopPropagation();
         var dim = jQuery(this).data('dim');
-        if (jQuery(this).siblings('.wardrobe-custom-input-wrap').length) return;
-        var inputHtml = '<span class="wardrobe-custom-input-wrap" data-dim="' + dim + '">'
-            + '<input type="text" class="wardrobe-custom-input" placeholder="输入自定义标签" />'
-            + '<span class="wardrobe-custom-confirm">✓</span>'
-            + '<span class="wardrobe-custom-cancel">✕</span>'
-            + '</span>';
-        jQuery(this).before(inputHtml);
-        jQuery(this).siblings('.wardrobe-custom-input-wrap').find('input').focus();
+        // 如果已有弹窗则不重复创建
+        if (jQuery('.wardrobe-custom-dialog-overlay').length) return;
+        var dialogHtml = '<div class="wardrobe-custom-dialog-overlay">'
+            + '<div class="wardrobe-custom-dialog">'
+            + '<div class="wardrobe-custom-dialog-title">添加自定义标签 - ' + dim + '</div>'
+            + '<input type="text" class="wardrobe-custom-dialog-input" data-dim="' + dim + '" placeholder="请输入标签名称" />'
+            + '<div class="wardrobe-custom-dialog-buttons">'
+            + '<button class="wardrobe-custom-dialog-cancel">✕ 取消</button>'
+            + '<button class="wardrobe-custom-dialog-confirm">✓ 确认</button>'
+            + '</div></div></div>';
+        jQuery('body').append(dialogHtml);
+        jQuery('.wardrobe-custom-dialog-input').focus();
     });
 
-    // 确认自定义标签
-    jQuery(document).on('click', '.wardrobe-custom-confirm', function() {
-        var wrap = jQuery(this).closest('.wardrobe-custom-input-wrap');
-        var dim = wrap.data('dim');
-        var val = wrap.find('.wardrobe-custom-input').val().trim();
-        if (!val) { wrap.remove(); return; }
+    // 弹窗确认
+    jQuery(document).on('click', '.wardrobe-custom-dialog-confirm', function() {
+        var input = jQuery('.wardrobe-custom-dialog-input');
+        var dim = input.data('dim');
+        var val = input.val().trim();
+        jQuery('.wardrobe-custom-dialog-overlay').remove();
+        if (!val) return;
         if (!currentSelections[currentCategory]) currentSelections[currentCategory] = {};
         if (!currentSelections[currentCategory][dim]) currentSelections[currentCategory][dim] = [];
         var arr = currentSelections[currentCategory][dim];
@@ -441,15 +446,22 @@ function bindEvents() {
         renderAttributes();
     });
 
-    // 取消自定义输入
-    jQuery(document).on('click', '.wardrobe-custom-cancel', function() {
-        jQuery(this).closest('.wardrobe-custom-input-wrap').remove();
+    // 弹窗取消
+    jQuery(document).on('click', '.wardrobe-custom-dialog-cancel', function() {
+        jQuery('.wardrobe-custom-dialog-overlay').remove();
+    });
+
+    // 点击遮罩层关闭弹窗
+    jQuery(document).on('click', '.wardrobe-custom-dialog-overlay', function(e) {
+        if (jQuery(e.target).hasClass('wardrobe-custom-dialog-overlay')) {
+            jQuery('.wardrobe-custom-dialog-overlay').remove();
+        }
     });
 
     // Enter/Escape键支持
-    jQuery(document).on('keydown', '.wardrobe-custom-input', function(e) {
-        if (e.key === 'Enter') jQuery(this).siblings('.wardrobe-custom-confirm').click();
-        if (e.key === 'Escape') jQuery(this).siblings('.wardrobe-custom-cancel').click();
+    jQuery(document).on('keydown', '.wardrobe-custom-dialog-input', function(e) {
+        if (e.key === 'Enter') jQuery('.wardrobe-custom-dialog-confirm').click();
+        if (e.key === 'Escape') jQuery('.wardrobe-custom-dialog-cancel').click();
     });
 
     // 删除自定义标签
